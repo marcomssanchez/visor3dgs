@@ -82,7 +82,7 @@
 
 <div id="panel">
   <header>
-    <h1>Visor 3DGS · VR</h1>
+    <h1>Visor 3DGS · VR <small style="color:var(--muted);font-weight:400">v6</small></h1>
     <button class="icon-btn" id="collapse" title="Ocultar panel">–</button>
   </header>
 
@@ -162,10 +162,19 @@
 <div id="status">Cargando motor 3D…</div>
 <script>
   // Muestra en pantalla cualquier error, incluso si el motor 3D no logra cargar
+  var firstErr = "";
   function showErr(msg) { var el = document.getElementById("status"); el.textContent = "⚠ " + msg; el.style.color = "#ff9c9c"; }
-  window.addEventListener("error", function (e) { showErr(e.message || "Error al cargar el motor 3D"); }, true);
+  window.addEventListener("error", function (e) {
+    var m = (e.message || (e.target && e.target.src) || "Error al cargar el motor 3D") + (e.lineno ? " (línea " + e.lineno + ")" : "");
+    if (!firstErr) firstErr = m;
+    showErr(m);
+  }, true);
   window.addEventListener("unhandledrejection", function (e) { showErr(String(e.reason && e.reason.message || e.reason)); });
-  setTimeout(function () { if (!window.__visorReady) showErr("El motor 3D no cargó en este navegador."); }, 15000);
+  setTimeout(function () {
+    if (window.__visorReady) return;
+    var kb = Math.round(document.documentElement.outerHTML.length / 1024);
+    showErr("El motor 3D no cargó (v6, " + kb + " KB). " + (firstErr ? "Error: " + firstErr : "Sin error visible: el archivo puede estar incompleto (debería pesar unos 2950 KB)."));
+  }, 20000);
 </script>
 
 <script>
